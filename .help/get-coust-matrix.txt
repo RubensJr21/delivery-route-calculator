@@ -1,0 +1,6 @@
+https://router.project-osrm.org/table/v1/driving/-40.23435,-20.21199;-40.20,-20.25;-40.24,-20.22;-40.21,-20.28?annotations=distance,duration
+
+
+coords = "-40.23435,-20.21199;-40.20,-20.25;-40.24,-20.22;-40.21,-20.28"
+
+https://router.project-osrm.org/table/v1/driving/{coords}?annotations=distance,duration
