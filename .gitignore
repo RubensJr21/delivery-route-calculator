@@ -1,6 +1,5 @@
-# test_files/*
 **/*.csv
 **/*.json
-# *.csv
-# *.json
 _config.py
+__pycache__/
+*.py[cod]
