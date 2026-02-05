@@ -35,7 +35,7 @@ def expandir_visita(rota):
   analistas_info = (
       contagem
       .reset_index()
-      .rename(columns={"index": "analista", "analista": "qtd"})
+      .rename(columns={"index": "analista", "analista": "name"})
       .to_dict(orient="records")
   )
 
