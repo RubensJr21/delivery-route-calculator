@@ -10,7 +10,7 @@ DEPOT_ADDR = [
     "DEPOT",  # id
     "Depot",  # analista
     "Cidade",  # bairro
-    "Endereço",  # endereco_atualizado
+    "<TIPO> e <NOME> do lougradouro, <NUM> do lougradoro",  # endereco_atualizado
     DEPOT_COORDS["lat"],
     DEPOT_COORDS["lon"],
     DEPOT_COORDS["alt"],
