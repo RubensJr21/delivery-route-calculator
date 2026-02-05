@@ -3,3 +3,4 @@
 _config.py
 __pycache__/
 *.py[cod]
+**/*.pdf
