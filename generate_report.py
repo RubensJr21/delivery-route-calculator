@@ -9,6 +9,23 @@ from reportlab.lib.units import cm
 from reportlab.platypus import (KeepTogether, PageBreak, Paragraph,
                                 SimpleDocTemplate, Spacer, Table, TableStyle)
 
+PAGE_WIDTH, PAGE_HEIGHT = landscape(A4)
+LARGURA_UTIL = PAGE_WIDTH - 2 * cm  # margens de 1cm
+
+larg_esq = LARGURA_UTIL * 0.7
+larg_dir = LARGURA_UTIL * 0.3
+
+
+def tabelas_lado_a_lado(tabela1, tabela2, proporcao=(0.7, 0.3)):
+  container = Table(
+      [[tabela1, tabela2]],
+      colWidths=[larg_esq, larg_dir],
+  )
+  container.setStyle(TableStyle([
+      ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+  ]))
+  return container
+
 
 def gerar_pdf_rotas(json_path: str, output_pdf: str) -> None:
   with open(json_path, encoding="utf-8") as f:
@@ -75,7 +92,7 @@ def gerar_pdf_rotas(json_path: str, output_pdf: str) -> None:
           Paragraph(
               f"Rota {idx} - Carga total: {total_load} cestas", styles["Heading3"])
       )
-      block.append(Spacer(1, 0.2 * cm))
+      block.append(Spacer(1, 0.1 * cm))
 
       # 2. Tabela de endereços
       header = ["ID Família", "Analista", "Bairro", "Endereço atualizado"]
@@ -106,14 +123,15 @@ def gerar_pdf_rotas(json_path: str, output_pdf: str) -> None:
               # Centraliza TODAS as células
               ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
           ]))
-      block.append(tabela)
-      block.append(Spacer(1, 0.3 * cm))
+      # block.append(tabela)
+      # block.append(Spacer(1, 0.3 * cm))
 
       # 3. Tabela de famílias por analista
       resumo_header = ["Analista", "Qtd famílias"]
       resumo_linhas = [[a["name"], a["count"]] for a in analistas]
       tabela_resumo = Table(
-          [resumo_header] + resumo_linhas, colWidths=[4 * cm, 2.5 * cm]
+          [resumo_header] + resumo_linhas,
+          colWidths=[4 * cm, 2.5 * cm]
       )
 
       # PRECISO ESTUDAR PARA ENTENDER
@@ -127,8 +145,11 @@ def gerar_pdf_rotas(json_path: str, output_pdf: str) -> None:
               ]
           )
       )
-      block.append(tabela_resumo)
-      block.append(Spacer(1, 0.5 * cm))
+      # block.append(tabela_resumo)
+      # block.append(Spacer(1, 0.5 * cm))
+
+      container = tabelas_lado_a_lado(tabela, tabela_resumo)
+      block.append(container)
 
       # adiciona o bloco atômico
       elems.append(KeepTogether(block))
