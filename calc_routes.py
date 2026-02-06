@@ -56,11 +56,11 @@ def calc_route(costs_csv_path="costs_matrix.csv"):
 
   demand_callback_index = routing.RegisterUnaryTransitCallback(demand_callback)
   routing.AddDimensionWithVehicleCapacity(
-      demand_callback_index,
-      0,  # nenhum “slack”
-      source["vehicle_capacities"],
-      True,  # start cumulativo em zero
-      "Capacity",
+    demand_callback_index,
+    0,  # nenhum “slack”
+    source["vehicle_capacities"],
+    True,  # start cumulativo em zero
+    "Capacity",
   )
 
   # Configura a busca
@@ -68,12 +68,12 @@ def calc_route(costs_csv_path="costs_matrix.csv"):
 
   # Testar PARALLEL_SAVINGS, SAVINGS, BEST_INSERTION, GLOBAL_CHEAPEST_ARC
   search_parameters.first_solution_strategy = (
-      routing_enums_pb2.FirstSolutionStrategy.PARALLEL_SAVINGS
+    routing_enums_pb2.FirstSolutionStrategy.PARALLEL_SAVINGS
   )
 
   # Testar GUIDED_LOCAL_SEARCH e TABU_SEARCH (talvez o SIMULATED_ANNEALING)
   search_parameters.local_search_metaheuristic = (
-      routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
+    routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH
   )
 
   search_parameters.time_limit.FromSeconds(10)  # por exemplo
@@ -84,8 +84,8 @@ def calc_route(costs_csv_path="costs_matrix.csv"):
 
   # 1) Pré-processamento: cria esqueleto
   routes = {
-      f"vehicle_{vehicle_id}": {"routes": []}
-      for vehicle_id in range(num_vehicles)
+    f"vehicle_{vehicle_id}": {"routes": []}
+    for vehicle_id in range(num_vehicles)
   }
 
   for vehicle_id in range(len(source["vehicle_capacities"])):
@@ -103,8 +103,8 @@ def calc_route(costs_csv_path="costs_matrix.csv"):
     route.append(manager.IndexToNode(index))
 
     visit = {
-        "points": route,  # ex.: [0, 2, 1, 3, 0]
-        "total_load": route_load  # cestas
+      "points": route,  # ex.: [0, 2, 1, 3, 0]
+      "total_load": route_load  # cestas
     }
 
     index_vehicle = f"vehicle_{int(vehicle_id) % num_vehicles}"

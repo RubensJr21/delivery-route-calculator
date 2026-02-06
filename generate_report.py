@@ -6,8 +6,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
-from reportlab.platypus import (KeepTogether, PageBreak, Paragraph,
-                                SimpleDocTemplate, Spacer, Table, TableStyle)
+from reportlab.platypus import (KeepTogether, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle)
 
 PAGE_WIDTH, PAGE_HEIGHT = landscape(A4)
 LARGURA_UTIL = PAGE_WIDTH - 2 * cm  # margens de 1cm
@@ -18,11 +17,11 @@ larg_dir = LARGURA_UTIL * 0.3
 
 def tabelas_lado_a_lado(tabela1, tabela2, proporcao=(0.7, 0.3)):
   container = Table(
-      [[tabela1, tabela2]],
-      colWidths=[larg_esq, larg_dir],
+    [[tabela1, tabela2]],
+    colWidths=[larg_esq, larg_dir],
   )
   container.setStyle(TableStyle([
-      ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
   ]))
   return container
 
@@ -32,22 +31,22 @@ def gerar_pdf_rotas(json_path: str, output_pdf: str) -> None:
     data = json.load(f)
 
   doc = SimpleDocTemplate(
-      output_pdf,
-      pagesize=landscape(A4),
-      rightMargin=1 * cm,
-      leftMargin=1 * cm,
-      topMargin=1 * cm,
-      bottomMargin=1 * cm,
+    output_pdf,
+    pagesize=landscape(A4),
+    rightMargin=1 * cm,
+    leftMargin=1 * cm,
+    topMargin=1 * cm,
+    bottomMargin=1 * cm,
   )
 
   styles = getSampleStyleSheet()
   titulo_style = ParagraphStyle(
-      "Titulo",
-      parent=styles["Heading1"],
-      alignment=1,
-      fontSize=20,
-      textColor=colors.HexColor("#1f4788"),
-      spaceAfter=0.5 * cm,
+    "Titulo",
+    parent=styles["Heading1"],
+    alignment=1,
+    fontSize=20,
+    textColor=colors.HexColor("#1f4788"),
+    spaceAfter=0.5 * cm,
   )
 
   elems = []
@@ -55,24 +54,16 @@ def gerar_pdf_rotas(json_path: str, output_pdf: str) -> None:
   # Cabeçalho geral
   elems.append(Paragraph("Rotas de Entrega", titulo_style))
   elems.append(
-      Paragraph(
-          f"<i>Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}</i>",
-          styles["Normal"],
-      )
+    Paragraph(
+      f"<i>Gerado em: {datetime.now().strftime('%d/%m/%Y %H:%M')}</i>",
+      styles["Normal"],
+    )
   )
   elems.append(Spacer(1, 0.5 * cm))
 
   # Uma seção por veículo
   first_time_vehicle = True
   for vehicle_id, rotas in data.items():
-    #########################################################
-    """
-    Agrupamento atômico:
-      Label Rota +
-      Tabela de Endereços +
-      Tabela de Famílias p/ Analista na Rota
-    """
-    #########################################################
     if not first_time_vehicle:
       elems.append(PageBreak())
     first_time_vehicle = False
@@ -89,66 +80,70 @@ def gerar_pdf_rotas(json_path: str, output_pdf: str) -> None:
 
       # 1. Label da rota
       block.append(
-          Paragraph(
-              f"Rota {idx} - Carga total: {total_load} cestas", styles["Heading3"])
-      )
+        Paragraph(
+          f"Rota {idx} - Carga total: {total_load} cestas",
+          styles["Heading3"]))
       block.append(Spacer(1, 0.1 * cm))
 
       # 2. Tabela de endereços
-      header = ["ID Família", "Analista", "Bairro", "Endereço atualizado"]
+      header = ["ID Família", "Analista",
+          "Bairro", "Endereço atualizado"]
       linhas = [
-          [
-              p["id"],
-              p["analista"],
-              Paragraph(p["bairro"], styles["Normal"]),
-              Paragraph(p["endereco_atualizado"], styles["Normal"])
-          ]
-          for p in pontos
+        [
+          p["id"],
+          p["analista"],
+          Paragraph(p["bairro"], styles["Normal"]),
+          Paragraph(p["endereco_atualizado"], styles["Normal"])
+        ]
+        for p in pontos
       ]
 
       # Procurar como quebrar o as linhas e não estourar
-      tabela = Table(
-          [header] + linhas,
-          colWidths=[2.5 * cm, 4 * cm, 4.5 * cm, 8 * cm],
-          repeatRows=1  # cabeçalhos repete se a tabela em si quebrar
+      addresses_table = Table(
+        [header] + linhas,
+        colWidths=[2.5 * cm, 4 * cm, 4.5 * cm, 8 * cm],
+        repeatRows=1  # cabeçalhos repete se a tabela em si quebrar
       )
 
       # PRECISO ESTUDAR PARA ENTENDER
-      tabela.setStyle(
-          TableStyle([
-              ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-              ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-              ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-              ("ALIGN", (0, 0), (-1, 0), "CENTER"),
-              # Centraliza TODAS as células
-              ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-          ]))
-      # block.append(tabela)
-      # block.append(Spacer(1, 0.3 * cm))
+      addresses_table.setStyle(
+        TableStyle([
+          ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+          ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+          ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+          ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+          # Centraliza TODAS as células
+          ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ])
+      )
 
       # 3. Tabela de famílias por analista
       resumo_header = ["Analista", "Qtd famílias"]
       resumo_linhas = [[a["name"], a["count"]] for a in analistas]
-      tabela_resumo = Table(
-          [resumo_header] + resumo_linhas,
-          colWidths=[4 * cm, 2.5 * cm]
+      baskets_per_analyst_table = Table(
+        [resumo_header] + resumo_linhas,
+        colWidths=[4 * cm, 2.5 * cm]
       )
 
       # PRECISO ESTUDAR PARA ENTENDER
-      tabela_resumo.setStyle(
-          TableStyle(
-              [
-                  ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-                  ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                  ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-                  ("ALIGN", (1, 1), (-1, -1), "CENTER"),
-              ]
-          )
+      baskets_per_analyst_table.setStyle(
+        TableStyle(
+          [
+            ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+            ("ALIGN", (1, 1), (-1, -1), "CENTER"),
+          ]
+        )
       )
-      # block.append(tabela_resumo)
-      # block.append(Spacer(1, 0.5 * cm))
+      # block += [
+      #   addresses_table,
+      #   Spacer(1, 0.3 * cm),
+      #   baskets_per_analyst_table,
+      #   Spacer(1, 0.5 * cm)
+      # ]
 
-      container = tabelas_lado_a_lado(tabela, tabela_resumo)
+      container = tabelas_lado_a_lado(addresses_table, baskets_per_analyst_table)
       block.append(container)
 
       # adiciona o bloco atômico

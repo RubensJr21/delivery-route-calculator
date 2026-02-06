@@ -1,32 +1,28 @@
 import sys
 from typing import List, Tuple
-
 import numpy as np
 import pandas as pd
 import requests
 
 from _config import DEPOT_COORDS
 
-
 def read_coordinates_from_csv(
-    csv_path: str,
-    lat_col: str = "latitude",
-    lon_col: str = "longitude",
-    sep: str = ",",
-    depot: Tuple[float, float] = (DEPOT_COORDS["lat"], DEPOT_COORDS["lon"]),
+  csv_path: str,
+  lat_col: str = "latitude",
+  lon_col: str = "longitude",
+  sep: str = ",",
+  depot: Tuple[float, float] = (DEPOT_COORDS["lat"], DEPOT_COORDS["lon"]),
 ) -> List[Tuple[float, float]]:
   """
   Lê coordenadas de um CSV e retorna lista de (lon, lat) no formato OSRM.
   """
-  df = pd.read_csv(csv_path, sep=sep,
-                   decimal=",")  # decimal=',' para vírgula BR
+  df = pd.read_csv(csv_path, sep=sep, decimal=",")  # decimal=',' para vírgula BR
   coords = [depot]
   for _, row in df.iterrows():
     lon = float(row[lon_col])
     lat = float(row[lat_col])
     coords.append((lon, lat))
   return coords
-
 
 def build_osrm_table_url(coords: List[Tuple[float, float]], sep: str = ",") -> str:
   """
@@ -36,9 +32,7 @@ def build_osrm_table_url(coords: List[Tuple[float, float]], sep: str = ",") -> s
   coord_str = ";".join([f"{lon},{lat}" for lon, lat in coords])
   return f"https://router.project-osrm.org/table/v1/driving/{coord_str}?annotations=distance,duration"
 
-
 def main(input_path, output_path):
-  # Exemplo de uso
   coordinates = read_coordinates_from_csv(input_path)
 
   url = build_osrm_table_url(coordinates)
@@ -48,26 +42,16 @@ def main(input_path, output_path):
   if response.status_code == 200:
     data = response.json()
 
-    # Salvar dados
-    # with open("osrm_table_from_csv.json", "w") as f:
-    #   json.dump(data, f, indent=2, ensure_ascii=False)
-
-    # print("Dados salvos em 'osrm_table_from_csv.json'")
-
     """
     distances é a distância em metros de um ponto até outro
     durations é o tempo em segundos de um ponto até outro
     """
-
-    # print("Matriz de distâncias:", data["distances"])
 
     SCALE = 10  # ou 100, se quiser ainda mais precisão
 
     raw = np.array(data["distances"], dtype=float)  # matriz NxN de float
     distance_matrix = np.rint(raw * SCALE).astype(int)
     np.savetxt(output_path, distance_matrix, fmt="%d", delimiter=",")
-
-    # print("Matriz de durações:", data["durations"])
 
     print(f"Matriz salva no arquivo {output_path}")
   else:
